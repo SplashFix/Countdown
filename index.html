@@ -24,7 +24,13 @@
       text-align: center;
       padding: 0;
     }
-    .card { width: 100%; max-width: 100vw; }
+    .card {
+      width: 100%;
+      max-width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
     h1#pageTitle {
       margin: 0 0 0.75rem;
@@ -75,7 +81,7 @@
     // =====================
     const DEFAULT_TARGET = '2026-06-01T00:00:00';
     const DEFAULT_TITLE = 'Countdown';
-    const SCALE = 2; // ASCII-Ziffernauflösung
+    const MAX_SCALE = 2; // Max. ASCII-Ziffernauflösung
 
     // URL-Parameter
     const params = new URLSearchParams(location.search);
@@ -100,16 +106,9 @@
     // ASCII 7-Segment Renderer
     // =====================
     const DIGIT_SEGMENTS = {
-      '0': ['a','b','c','d','e','f'],
-      '1': ['b','c'],
-      '2': ['a','b','g','e','d'],
-      '3': ['a','b','g','c','d'],
-      '4': ['f','g','b','c'],
-      '5': ['a','f','g','c','d'],
-      '6': ['a','f','g','e','c','d'],
-      '7': ['a','b','c'],
-      '8': ['a','b','c','d','e','f','g'],
-      '9': ['a','b','c','d','f','g']
+      '0': ['a','b','c','d','e','f'], '1': ['b','c'], '2': ['a','b','g','e','d'], '3': ['a','b','g','c','d'],
+      '4': ['f','g','b','c'], '5': ['a','f','g','c','d'], '6': ['a','f','g','e','c','d'], '7': ['a','b','c'],
+      '8': ['a','b','c','d','e','f','g'], '9': ['a','b','c','d','f','g']
     };
 
     function repeat(ch, n) { return ch.repeat(Math.max(0, n)); }
@@ -165,6 +164,24 @@
     }
 
     // =====================
+    // Responsive Scaling
+    // =====================
+    function getScaleForWidth(width) {
+      if (width < 500) return 0;
+      if (width < 800) return 1;
+      return MAX_SCALE;
+    }
+    let currentScale = getScaleForWidth(window.innerWidth);
+
+    window.addEventListener('resize', () => {
+      const newScale = getScaleForWidth(window.innerWidth);
+      if (newScale !== currentScale) {
+        currentScale = newScale;
+        update(); // Force re-render with the new scale
+      }
+    });
+
+    // =====================
     // Netzwerkzeit / Offset
     // =====================
     let clockOffsetMs = 0; // serverUTC - localUTC
@@ -214,7 +231,7 @@
       const hrs = Math.floor(diff / (1000*60*60)) % 24;
       const days = Math.floor(diff / (1000*60*60*24));
       const text = `${days}:${pad2(hrs)}:${pad2(min)}:${pad2(sec)}`;
-      asciiEl.textContent = renderAscii(text, SCALE);
+      asciiEl.textContent = renderAscii(text, currentScale);
       unitsEl.textContent = `${days === 1 ? 'Tag' : 'Tage'} : Stunden : Minuten : Sekunden`;
     }
 
