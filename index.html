@@ -167,7 +167,7 @@
     // Responsive Scaling
     // =====================
     function getScaleForWidth(width) {
-      if (width < 500) return 0;
+      if (width < 500) return 1; // Changed from 0 to 1
       if (width < 800) return 1;
       return MAX_SCALE;
     }
@@ -233,6 +233,11 @@
       const text = `${days}:${pad2(hrs)}:${pad2(min)}:${pad2(sec)}`;
       asciiEl.textContent = renderAscii(text, currentScale);
       unitsEl.textContent = `${days === 1 ? 'Tag' : 'Tage'} : Stunden : Minuten : Sekunden`;
+
+      // Center scrollable content in pre#ascii
+      if (asciiEl.scrollWidth > asciiEl.clientWidth) {
+        asciiEl.scrollLeft = (asciiEl.scrollWidth - asciiEl.clientWidth) / 2;
+      }
     }
 
     let tickTimer = null;
